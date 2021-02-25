@@ -1,4 +1,3 @@
-cd /tmp
 apt update && apt upgrade -y -f
 apt install jq -y
 
