@@ -12,7 +12,7 @@ bash /etc/newadm/menu --barra
 }
 _banner () {
   barra
-  echo "=      \033[1;36mV2RAY MANAGER \033[1;32m[NEW-ADM-PLUS]      \033[0m="
+  echo "\e[1;34m=      \e[1;36mV2RAY MANAGER \033[1;32m[NEW-ADM-PLUS]      \e[1;34m=\e[0m"
   barra
 }
 display_uuid () {
