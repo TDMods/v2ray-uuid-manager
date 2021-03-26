@@ -4,7 +4,7 @@ TMPFILE="/root/tmp.json"
 V2RAYFILE="/etc/v2ray/config.json"
 _banner_2 () {
   echo "==================================="
-  echo "=      CREATED BY PHC_JAYVEE      ="
+  echo "=      CREATED BY THONYDROID      ="
   echo "==================================="
 }
 barra () {
@@ -12,7 +12,7 @@ bash /etc/newadm/menu --barra
 }
 _banner () {
   barra
-  echo "\e[1;34m=      \e[1;36mV2RAY MANAGER \033[1;32m[NEW-ADM-PLUS]      \e[1;34m=\e[0m"
+  echo "=      \033[1;36mV2RAY MANAGER \033[1;32m[NEW-ADM-PLUS]      \033[0m="
   barra
 }
 display_uuid () {
@@ -98,7 +98,7 @@ delete_uuid () {
 set_exp_date () {
   result=$(get_exp_date "${OPTEXP}")
   #croncmd="phcv2raymanager -d -u ${1} && ( crontab -l | grep -v -F 'phcv2raymanager -d -u ${1}') | crontab -"
-  croncmd="v2ray_adm -d -u ${1} && ( crontab -l | grep -v -F 'v2ray_adm -d -u ${1}') | crontab -"
+  croncmd="v2plus -d -u ${1} && ( crontab -l | grep -v -F 'v2plus -d -u ${1}') | crontab -"
   cronjob="${result} * $croncmd"
   ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
 }
