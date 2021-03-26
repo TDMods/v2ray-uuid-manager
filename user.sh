@@ -188,7 +188,7 @@ add_uuid () {
   printf "\033[1;32m-- MENU --\033[0m\n"
   printf "[\033[1;32m1\033[0m]\033[1;36m Agregar UUID existente\033[0m\n"
   printf "[\033[1;32m2\033[0m]\033[1;36m Generar nuevo y luego agregar\033[0m\n"
-    read -r -p "$(printf '\033[1;32m¿Qué es lo que quieres hacer? \033[1;33m\n')" ADDINPUT
+    read -r -p "$(printf '\033[1;32m¿Qué es lo que quieres hacer?: 》\033[1;33m\n')" ADDINPUT
 
 
   case $ADDINPUT in
