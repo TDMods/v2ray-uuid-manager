@@ -311,7 +311,7 @@ done
 ASKCONTINUE="false"
 if [[ "$OPTADD" == "true" ]] && [[ "$OPTDEL" == "true" ]] && [[ "$OPTHELP" == "true" ]]
 then
-  echo "-a and -d -h cannot raise at the same time"
+  echo "-a y -d -h no se puede subir al mismo tiempo"
 elif [[ "$OPTADD" == "true" ]] && [[ "$OPTDEL" == "true" ]]
 then
   print_help
