@@ -2,13 +2,21 @@
 TMPFILE="/root/tmp.json"
 #V2RAYFILE="/usr/local/etc/v2ray/config.json"
 V2RAYFILE="/etc/v2ray/config.json"
-_banner () {
+_banner_2 () {
   echo "==================================="
   echo "=      CREATED BY PHC_JAYVEE      ="
   echo "==================================="
 }
+barra () {
+bash /etc/newadm/menu --barra
+}
+_banner () {
+  barra
+  echo "=      \033[1;36mV2RAY MANAGER \033[1;32m[NEW-ADM-PLUS]      \033[0m="
+  barra
+}
 display_uuid () {
-  printf "\033[1;32mYOUR ACTIVE UUID\033[0m\n"
+  printf "\033[1;32mSUS UUID ACTIVOS\033[0m\n"
   x=0
   for i in $(jq -r ".inbounds[].settings.clients[].id" $V2RAYFILE)
   do
@@ -18,15 +26,15 @@ display_uuid () {
   printf "\n\n"
 }
 ask_end () {
-  read -r -p "$(printf '\033[1;32mDo you want to continue? \033[1;33m\033[1;32m[y/n] \033[1;33m\n')" CONFEXIT
+  read -r -p "$(printf '\033[1;32m¿Quieres continuar? \033[1;33m\033[1;32m[y/n] \033[1;33m\n')" CONFEXIT
   case $CONFEXIT in  
     y|Y) clear
     start_run ;; 
-    n|N) printf '\033[1;32mOKAY exiting... \033[1;33m\n'
+    n|N) printf '\033[1;32mOK, saliendo ... \033[1;33m\n'
       sleep 2
       exit
       ;; 
-    *) printf "\033[1;31mINVALID CHOICE. Only y/n are allowed\033[0m\n"
+    *) printf "\033[1;31mSELECCIÓN INVÁLIDA. Solo se permiten y/n\033[0m\n"
       sleep 2
       clear
       start_run
@@ -36,15 +44,15 @@ ask_end () {
 }
 display_menu () {
   printf "\033[1;32m-- MENU --\033[0m\n"
-  printf "[\033[1;32m1\033[0m]\033[1;36m ADD\033[0m\n"
-  printf "[\033[1;32m2\033[0m]\033[1;36m DELETE\033[0m\n"
-  printf "[\033[1;32m3\033[0m]\033[1;36m EXIT\033[0m\n"
+  printf "[\033[1;32m1\033[0m]\033[1;36m AGREGAR\033[0m\n"
+  printf "[\033[1;32m2\033[0m]\033[1;36m ELIMINAR\033[0m\n"
+  printf "[\033[1;32m3\033[0m]\033[1;36m SALIR\033[0m\n"
 }
 DoDelete_uuid () {
   jq 'del(.inbounds[].settings.clients['"$1"'])' $V2RAYFILE >> $TMPFILE
   cat $TMPFILE > $V2RAYFILE
   rm $TMPFILE
-  printf "\033[1;32mDONE\033[0m\n"
+  printf "\033[1;32mHECHO\033[0m\n"
   systemctl restart v2ray &>/dev/null
   sleep 2
   if [[ "$ASKCONTINUE" == "true" ]]
@@ -55,31 +63,31 @@ DoDelete_uuid () {
 delete_uuid () {
   _banner
   display_uuid
-  read -r -p "$(printf '\033[1;32mWhat do you want to delete? \033[1;33m\n')" DELINPUT
+  read -r -p "$(printf '\033[1;32m¿Cuál quieres borrar?\033[1;33m\n')" DELINPUT
   re='^[0-9]+$'
   if ! [[ $DELINPUT =~ $re ]] ; then
-    printf "\033[1;31mINVALID CHOICE. Only numbers are allowed\033[0m\n"
+    printf "\033[1;31mELECCIÓN INVÁLIDA. Solo se permiten números\033[0m\n"
     sleep 2
     clear
     delete_uuid
   fi
   if [[ $(jq -r ".inbounds[].settings.clients[$DELINPUT].id" $V2RAYFILE) == null ]]
   then
-    printf "\033[1;31mINVALID CHOICE\033[0m\n"
+    printf "\033[1;31mELECCIÓN INVALIDA\033[0m\n"
     sleep 2
     clear
     delete_uuid
   else
-    printf "\033[1;32mAre you sure you want to delete this UUID ? \033[1;36m"$(jq -r ".inbounds[].settings.clients[$DELINPUT].id" $V2RAYFILE) "\033[1;33m\n"
+    printf "\033[1;32m¿Estás seguro de que quieres eliminar este UUID? \033[1;36m"$(jq -r ".inbounds[].settings.clients[$DELINPUT].id" $V2RAYFILE) "\033[1;33m\n"
     read -r -p "$(printf '\033[1;32m[y/n] \033[1;33m\n')" DELCONFINPUT
     case $DELCONFINPUT in  
       y|Y) DoDelete_uuid "$DELINPUT" ;; 
-      n|N) printf '\033[1;32mOKAY \033[1;33m\n'
+      n|N) printf '\033[1;32mOKEY \033[1;33m\n'
         sleep 2
         clear
         start_run
         ;; 
-      *) printf "\033[1;31mINVALID CHOICE. Only y/n are allowed\033[0m\n"
+      *) printf "\033[1;31mELECCIÓN INVÁLIDA. Solo se permiten y/n\033[0m\n"
         sleep 2
         clear
         delete_uuid
@@ -89,7 +97,8 @@ delete_uuid () {
 }
 set_exp_date () {
   result=$(get_exp_date "${OPTEXP}")
-  croncmd="phcv2raymanager -d -u ${1} && ( crontab -l | grep -v -F 'phcv2raymanager -d -u ${1}') | crontab -"
+  #croncmd="phcv2raymanager -d -u ${1} && ( crontab -l | grep -v -F 'phcv2raymanager -d -u ${1}') | crontab -"
+  croncmd="v2ray_adm -d -u ${1} && ( crontab -l | grep -v -F 'v2ray_adm -d -u ${1}') | crontab -"
   cronjob="${result} * $croncmd"
   ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab -
 }
@@ -109,14 +118,14 @@ DoUUIDAdd (){
   fi
 }
 add_existing_uuid () {
-  read -r -p "$(printf '\033[1;32mEnter UUID \033[1;33m\n')" UUIDINP
-  read -r -p "$(printf '\033[1;32mDo you like to add expired date? [y/n]\033[1;33m\n')" ASKFOREXPDATE
+  read -r -p "$(printf '\033[1;32mIngrese el UUID: 》\033[1;33m\n')" UUIDINP
+  read -r -p "$(printf '\033[1;32m¿Quiere agregar una fecha de vencimiento? [S/N]\033[1;33m\n')" ASKFOREXPDATE
   case $ASKFOREXPDATE in
 
-    y|Y)
-      read -r -p "$(printf '\033[1;32mHow many days?\033[1;33m\n')" INPEXPDATE
+    n|N|y|Y)
+      read -r -p "$(printf '\033[1;32m¿Cuántos días?\033[1;33m\n')" INPEXPDATE
       if [[ -n ${input//[0-9]/} ]]; then
-        printf "\033[1;31mINVALID CHOICE\033[0m\n"
+        printf "\033[1;31mELECCIÓN INVALIDA\033[0m\n"
         sleep 2
         clear
         add_existing_uuid
@@ -132,7 +141,7 @@ add_existing_uuid () {
       ;;
 
     *)
-      printf "\033[1;31mINVALID CHOICE\033[0m\n"
+      printf "\033[1;31mELECCIÓN INVALIDA\033[0m\n"
       sleep 2
       clear
       add_existing_uuid
@@ -143,14 +152,14 @@ add_generated_uuid () {
 
   #TheUUID=$(curl -skL -w #"\n" https://www.uuidgenerator.net/api/version4)
   TheUUID=$(cat /proc/sys/kernel/random/uuid)
-  printf "\033[1;33mYour UUID Code:\033[1;36m $TheUUID\033[0m\n"
-  read -r -p "$(printf '\033[1;32mDo you like to add expired date? [y/n]\033[1;33m\n')" ASKFOREXPDATE
+  printf "\033[1;33mSu código UUID: 》\033[1;36m $TheUUID\033[0m\n"
+  read -r -p "$(printf '\033[1;32m¿Quiere agregar una fecha de vencimiento? [s/n]\033[1;33m\n')" ASKFOREXPDATE
   case $ASKFOREXPDATE in
 
-    y|Y)
-      read -r -p "$(printf '\033[1;32mHow many days? \033[1;33m\n')" INPEXPDATE
+    s|S|y|Y)
+      read -r -p "$(printf '\033[1;32m¿Cuántos días? \033[1;33m\n')" INPEXPDATE
       if [[ -n ${input//[0-9]/} ]]; then
-        printf "\033[1;31mINVALID CHOICE\033[0m\n"
+        printf "\033[1;31mELECCIÓN INVALIDA\033[0m\n"
         sleep 2
         clear
         add_generated_uuid
@@ -166,7 +175,7 @@ add_generated_uuid () {
       ;;
 
     *)
-      printf "\033[1;31mINVALID CHOICE\033[0m\n"
+      printf "\033[1;31mELECCIÓN INVALIDA\033[0m\n"
       sleep 2
       clear
       add_generated_uuid
@@ -177,9 +186,9 @@ add_uuid () {
   clear
   _banner
   printf "\033[1;32m-- MENU --\033[0m\n"
-  printf "[\033[1;32m1\033[0m]\033[1;36m Add existing UUID\033[0m\n"
-  printf "[\033[1;32m2\033[0m]\033[1;36m Generate New then add\033[0m\n"
-    read -r -p "$(printf '\033[1;32mWhat do you want to do? \033[1;33m\n')" ADDINPUT
+  printf "[\033[1;32m1\033[0m]\033[1;36m Agregar UUID existente\033[0m\n"
+  printf "[\033[1;32m2\033[0m]\033[1;36m Generar nuevo y luego agregar\033[0m\n"
+    read -r -p "$(printf '\033[1;32m¿Qué es lo que quieres hacer? \033[1;33m\n')" ADDINPUT
 
 
   case $ADDINPUT in
@@ -193,7 +202,7 @@ add_uuid () {
       ;;
 
     *)
-      printf "\033[1;31mINVALID CHOICE\033[0m\n"
+      printf "\033[1;31m ELECCIÓN INVALIDA\033[0m\n"
       sleep 2
       clear
       add_uuid
@@ -204,30 +213,30 @@ start_run(){
   _banner
   display_uuid
   display_menu
-  read -r -p "$(printf '\033[1;32mWhat do you want to do? \033[1;33m\n')" INPUT
+  read -r -p "$(printf '\033[1;32m¿Qué es lo que quieres hacer?\033[1;33m\n')" INPUT
 
 
   case $INPUT in
 
     1)
-      printf '\033[1;32mOKAY \033[1;33m\n'
+      printf '\033[1;32mOKEY \033[1;33m\n'
       add_uuid
       ;;
 
     2)
-      printf '\033[1;32mOKAY \033[1;33m\n'
+      printf '\033[1;32mOKEY \033[1;33m\n'
       sleep 2
       clear
       delete_uuid
       ;;
     3)
-      printf '\033[1;32mOKAY \033[1;33m\n'
+      printf '\033[1;32mOKEY \033[1;33m\n'
       sleep 2
       exit
       ;;
 
     *)
-      printf "\033[1;31mINVALID CHOICE\033[0m\n"
+      printf "\033[1;31mELECCIÓN INVALIDA\033[0m\n"
       sleep 2
       clear
       _banner
@@ -267,17 +276,19 @@ get_exp_date () {
 print_help () {
   clear
   echo "===================================="
-  echo "-a = Add UUID  - flag only"
-  echo "-d = Delete UUID - flag only"
-  echo "-u = UUID  - need string after the flag"
-  echo "-r = Random  - flag only"
-  echo "-h = Help - flag only"
-  echo "-n = Number - need int after the flag"
-  echo "===================================="
-  echo "when -a is raise -u or -r required"
-  echo "when -d is raise -n or -u required"
-  echo "when -h is raise -a and -d must not active"
-  echo "===================================="
+  echo "-a = Agregar UUID: solo marca"
+  echo "-d = Eliminar UUID: solo marca"
+  echo "-u = UUID: necesita una cadena después de la bandera"
+  echo "-r = Aleatorio: solo bandera"
+  echo "-h = Ayuda - solo bandera"
+  echo "-n = Número: necesita int después de la bandera"
+  barra
+  #echo "===================================="
+  echo "Cuando -a es aumentar -u o -r requerido"
+  echo "Cuando -d es raise -n o -u requerido"
+  echo "Cuando -h es aumento -a y -d no deben estar activos"
+  #echo "===================================="
+  barra
 }
 while getopts "a d r h n:u:e:" opt; do
   case "${opt}" in
@@ -314,7 +325,7 @@ elif [[ "$OPTADD" == "true" ]]
 then
   if [[ "$OPTRAND" == "true" ]] && [[ "$OPTUUIDA" == "true" ]]
   then
-    echo "-r and -u cannot raise at the same time"
+    echo "-r y -u no se puede subir al mismo tiempo"
   elif [[ "$OPTRAND" == "true" ]]
   then
     add_generated_uuid
